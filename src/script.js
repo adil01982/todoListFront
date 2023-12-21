@@ -69,15 +69,30 @@ function createCloseButtons() {
     // Add event listener for close buttons
     span.addEventListener(
       "click",
-      (function (key) {
+      (function (key, taskNameElement) {
         return function () {
           // Now, 'key' will be the correct value
-          deleteTask(key);
+          displayDeleteConfirmationModal(taskNameElement.textContent, key);
         };
-      })(rowKey)
+      })(rowKey, myNodelist[i])
     );
   }
 }
+
+
+function displayDeleteConfirmationModal(taskName, rowKey) {
+  // Remove the last letter from the task name
+  var truncatedTaskName = taskName.slice(0, -1);
+
+  document.getElementById("taskNameToDelete").textContent = truncatedTaskName;
+  $("#confirmDeleteModal").modal("show");
+
+  document.getElementById("confirmDeleteButton").addEventListener("click", function () {
+    $("#confirmDeleteModal").modal("hide");
+    deleteTask(rowKey);
+  });
+}
+
 
 async function deleteTask(rowKey) {
   const apiKey = "adil123++";
@@ -89,16 +104,15 @@ async function deleteTask(rowKey) {
         "Content-Type": "application/json",
         "x-functions-key": apiKey,
       },
-
       body: JSON.stringify({ operation: "delete", row_key: rowKey }),
     });
 
-    // Refresh the task list after deleting a task
     fetchData();
   } catch (error) {
     console.error("Error deleting task:", error);
   }
 }
+
 
 function addClickEventListener() {
   // Add a "checked" symbol when clicking on a list item
